@@ -1,0 +1,4 @@
+#!/bin/bash
+echo script run test
+echo $1 > ./tmp/exec
+echo "2:$2" >> ./tmp/exec

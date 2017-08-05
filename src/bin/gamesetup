@@ -1,0 +1,67 @@
+#!%PERL%
+use warnings;
+use strict;
+use Gamesetup::Base;
+
+my $modules_dir="%MODULESDIR%";
+my $prog = $0;
+
+
+&main;
+sub main {
+	my $config = $ARGV[0];
+	if (!$config) {
+		print "usage: $prog <config file>\n";
+		exit 1;
+	}
+	if (! -r $config) {
+		print "Error could not read $config\n";
+		exit 2;
+	}
+
+	config2env(read_config($config));
+
+	my @modules_list = @{get_module_list()};
+
+	foreach my $module (@modules_list) {
+		print "Launching $module\n";
+		system($module,@ARGV);
+	}
+}
+
+
+## get_module_list
+# get a list of the available modules;
+# OUTPUT: array pointer listing the modules. (absolute paths)
+sub get_module_list {
+	my $dir;
+	my @dir_contents;
+	my @module_list;
+
+	if(!opendir($dir, $modules_dir)) {
+		die("Error could not open directory '$modules_dir': $!\n");
+	}
+	@dir_contents = readdir($dir);
+	closedir($dir);
+
+	for my $item (@dir_contents) {
+		my $abs_path = "$modules_dir/$item";
+		if (-f $abs_path && -f $abs_path) {
+			push(@module_list, $abs_path);
+		}
+	}
+	@module_list = sort(@module_list);
+	return \@module_list;
+}
+
+## config2env
+# Puts a 2d config file hash into the shell environment. In the form of $KEY1__$KEY2 = value
+sub config2env {
+	my %config = %{shift(@_)};
+	
+	foreach my $key1 (keys %config) {
+		foreach my $key2 (keys %{$config{$key1}}) {
+			$ENV{"$key1\__$key2"} = $config{$key1}{$key2};
+		}
+	}
+}

@@ -1,0 +1,343 @@
+#!/bin/bash
+
+BINDIR="/usr/bin"
+PREFIX=""
+LOCALSTATEDIR="/var"
+LOCALPROGDIR="/usr/"
+MODULESDIR="$LOCALPROGDIR/share/gamesetup/modules"
+TESTSDIR="$LOCALPROGDIR/share/gamesetup/tests"
+PERLLIBDIR="/usr/local/share/perl5"
+
+SYSCONFDIR="/etc/sysconfig"
+
+
+if [ -d $SYSCONFDIR ]; then
+	SYSCONFDIR="/etc/sysconfig"
+else 
+	SYSCONFDIR="/etc/default"
+fi
+
+
+
+
+while [[ $# > 0 ]]; do
+	arg="$1"
+
+	case $arg in
+		--sbindir)
+			BINDIR="$2"
+			shift # past argument
+			shift # past argument
+		;;
+		--prefix)
+			PREFIX="$2"
+			shift # past argument
+			shift # past argument
+		;;
+		--sysconfdir)
+			SYSCONFDIR=$2
+			shift # past argument
+			shift # past argument
+		;;
+		--localstatedir)
+			LOCALSTATEDIR=$2
+			shift # past argument
+			shift # past argument
+		;;
+		--perllibdir)
+			PERLLIBDIR=$2
+			shift # past argument
+			shift # past argument
+		;;
+		--help)
+			echo "./configure [options]"
+			echo
+			echo "OPTIONS:"
+			echo "  --prefix <dir> :Give a location to prefix all installs (everything but the init scripts will end up in thie directory (default /)"
+			echo
+			echo "  --sbindir <dir> :Give the loction to install privileged commands (default /usr/sbin)"
+			echo "  --sysconfdir <dir> :Give the loction of the the system configuration directory (default $SYSCONFDIR)"
+			echo "  --localstatedir <dir> :Give the loction of the the system state directory (default /var)"
+			echo "  --starmadedir <dir> :Give the loction of the installation in the localstatedir (default starmade)"
+			echo "  --starmadedir <dir> :Give the loction of the installation in the localstatedir (default starmade)"
+			echo
+			echo "  --with-initv  :Compile with initv scripts"
+			echo "  --without-initv  :Compile without initv scripts"
+			echo "  --standalone  :Compile standalone version. (WARNING EXPERIMENTAL)"
+			echo "  --user  :User that the daemons will run as. (This user will be created in the make install step)"
+			exit 0
+		;;
+		*)
+			echo "Error. unknown option given $1."
+			echo "see --help for a full list of options"
+			exit 1
+		;;
+	esac
+	#shift # past argument or value
+done
+
+
+
+
+echo "Checking Dependancies"
+echo -n "bash... "
+command -v bash > /dev/null 2>&1 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+	BASH=$(command -v bash)
+else
+	echo "not ok"
+	echo "FAILED to locate bash installation... aborting."
+	echo "see --help for more information"
+	exit 1
+fi
+
+echo -n "perl... "
+command -v perl > /dev/null 2>&1
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+	PERL=$(command -v perl)
+else
+	echo "not ok"
+	echo "FAILED to locate perl installation... aborting."
+	echo "If perl is installed, it is not in your current"
+	echo "path, you can specify a specific path to the perl"
+	echo "binary with the --perl option"
+	echo "see --help for more information"
+	exit 1
+fi
+
+echo -n "perl-strict... "
+$PERL -e "use strict" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module strict... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-warnings... "
+$PERL -e "use warnings" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module warnings... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-Config::IniFiles... "
+$PERL -e "use Config::IniFiles" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module Config::IniFiles... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-File::Path... "
+$PERL -e "use File::Path" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module File::Path... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-File::Copy... "
+$PERL -e "use File::Copy" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module File::Copy... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-Cwd... "
+$PERL -e "use Cwd" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module Cwd... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "perl-Test::Simple... "
+$PERL -e "use Test::Simple" 
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate perl module Test::Simple... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "sed... "
+command -v sed > /dev/null 2>&1
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate sed installation... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+echo -n "rsync... "
+command -v rsync > /dev/null 2>&1
+RET=$?
+if [ $RET -eq 0 ]; then
+	echo "ok"
+else
+	echo "not ok"
+	echo "FAILED to locate rsync installation... aborting."
+	echo "Look into installing this package from your distro's repositories"
+	exit 1
+fi
+
+
+function subs_strings {
+	
+	echo "	sed -i \"s,%BASH%,\$(BASH),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%PERL%,\$(PERL),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%PYTHON%,\$(PYTHON),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%JAVA%,\$(JAVA),g\" $1" >> ./Makefile
+
+	echo "	sed -i \"s,%BINDIR%,\$(BINDIR),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%SYSCONFDIR%,\$(SYSCONFDIR),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%LOCALSTATEDIR%,\$(LOCALSTATEDIR),g\" $1" >> ./Makefile
+
+	echo "	sed -i \"s,%MODULESDIR%,\$(MODULESDIR),g\" $1" >> ./Makefile
+	echo "	sed -i \"s,%TESTSDIR%,\$(TESTSDIR),g\" $1" >> ./Makefile
+
+
+	echo "	sed -i \"s,%CWD%,\$(PWD),g\" $1" >> ./Makefile
+
+	echo "" >> ./Makefile
+}
+
+echo -n "Writing New Makefile..."
+echo -n '' > ./Makefile
+
+echo "
+NAME			= gamesetup
+VERSION			= 0.0.1
+MODULES_SOURCE		= ./src/modules
+LIB_SOURCE		= ./src/lib
+BIN_SOURCE		= ./src/bin
+TESTS_SOURCE		= ./src/tests
+BUILD_DIR		= ./build
+BASE_DIR		= \$(pwd)
+
+
+## location settings
+BASH 			= $BASH
+PERL 			= $PERL
+PYTHON 			= $PYTHON
+JAVA 			= $JAVA
+PREFIX			= $PREFIX
+BINDIR			= \$(PREFIX)$BINDIR
+SYSCONFDIR		= $SYSCONFDIR
+LOCALSTATEDIR		= \$(PREFIX)/$LOCALSTATEDIR
+SYSTEMDSERVICEDIR	= $SYSTEMDSERVICEDIR
+LOCALPROGDIR		= $LOCALPROGDIR
+MODULESDIR		= $MODULESDIR
+TESTSDIR		= $TESTSDIR
+PERLLIBDIR		= $PERLLIBDIR
+
+all: clean mkbuild build_system
+
+mkbuild: 
+	mkdir -p \$(BUILD_DIR)
+	cp -arf \$(BIN_SOURCE) \$(BUILD_DIR)/
+	cp -arf \$(LIB_SOURCE) \$(BUILD_DIR)/
+	cp -arf \$(MODULES_SOURCE) \$(BUILD_DIR)/
+	cp -arf \$(TESTS_SOURCE) \$(BUILD_DIR)/
+
+build_system:
+" >> ./Makefile
+
+
+
+subs_strings '$(BUILD_DIR)/bin/gamesetup'
+
+subs_strings '$(BUILD_DIR)/lib/Gamesetup/Base.pm'
+subs_strings '$(BUILD_DIR)/lib/Gamesetup/Wine.pm'
+
+subs_strings '$(BUILD_DIR)/modules/00_gamsetup_dep.pl'
+subs_strings '$(BUILD_DIR)/modules/01_hybridize.pl'
+subs_strings '$(BUILD_DIR)/modules/11_wine_setup.pl'
+subs_strings '$(BUILD_DIR)/modules/12_unpack.pl'
+subs_strings '$(BUILD_DIR)/modules/80_modloader.pl'
+subs_strings '$(BUILD_DIR)/modules/88_wine_deps.pl'
+subs_strings '$(BUILD_DIR)/modules/89_prerun_script.pl'
+subs_strings '$(BUILD_DIR)/modules/90_wine_exec.pl'
+subs_strings '$(BUILD_DIR)/modules/91_exec.pl'
+subs_strings '$(BUILD_DIR)/modules/99_postrun_script.pl'
+
+subs_strings '$(BUILD_DIR)/tests/test.pl'
+subs_strings '$(BUILD_DIR)/tests/areas/lib_base/read_config_test.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/lib_wine/wine_env_test.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/lib_wine/wine_os_test.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/lib_wine/wine_os_test2.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/wine_setup.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/unpack/unpack.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/hybridize/hybridize.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_all_copy.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_all_link.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_all_copy_save.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_ask_link.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_none_copy_save.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_none_link.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/wine_deps.conf'
+
+echo "
+test:
+	rm -rf ./tmp
+	./build/tests/test.pl
+	rm -rf ./tmp
+" >> ./Makefile
+
+echo "
+install:
+	mkdir -p \$(DESTDIR)\$(BINDIR)/
+	mkdir -p \$(BUILD_DIR)/lib/* \$(DESTDIR)\$(PERLLIBDIR)/
+	mkdir -p \$(DESTDIR)\$(MODULESDIR)/
+	mkdir -p \$(DESTDIR)\$(TESTSDIR)/
+
+	cp -prf \$(BUILD_DIR)/bin/gamesetup \$(DESTDIR)\$(BINDIR)/
+	cp -prf \$(BUILD_DIR)/lib/* \$(DESTDIR)\$(PERLLIBDIR)/
+	cp -prf \$(BUILD_DIR)/modules/* \$(DESTDIR)\$(MODULESDIR)/
+
+" >> ./Makefile
+
+
+echo "
+clean:
+	rm -rf ./build
+	rm -rf ./tmp
+" >> ./Makefile
+
+echo 'Success!'
