@@ -51,6 +51,10 @@ sub main {
 		push(@args, "--copylist");
 		push(@args, $config_hy{CopyList});
 	}
+	if ($config_hy{WhiteList}) {
+		push(@args, "--copylist");
+		push(@args, $config_hy{WhiteList});
+	}
 	if ($config_hy{ExcludeList}) {
 		push(@args, "--excludelist");
 		push(@args, $config_hy{ExcludeList});
