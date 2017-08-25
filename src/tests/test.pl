@@ -3,7 +3,7 @@ use warnings;
 use strict;
 
 use Cwd;
-use Test::Simple tests => 96;
+use Test::Simple tests => 95;
 
 use lib("./build/lib");
 use Gamesetup::Base;
@@ -298,7 +298,6 @@ sub wine_deps_tests {
 	$ret = system($module, "./build/tests/areas/modules/wine_deps.conf");
 	ok($ret == 0, "$module_name: exits with 0") or die;
 
-	ok(-d "./tmp/wine_deps_test/drive_c/Program Files (x86)/QuickTime", "$module_name: quicktime install") or die;
 	ok(-e "./tmp/wine_deps_test/drive_c/windows/system32/d3dx9_42.dll", "$module_name: 64 bit d3dx9_42") or die;
 	ok(-e "./tmp/wine_deps_test/drive_c/windows/syswow64/d3dx9_42.dll", "$module_name: 32 bit d3dx9_42") or die;
 	ok(-e "./tmp/wine_deps_test/drive_c/windows/system32/d3dx9_26.dll", "$module_name: 64 bit d3dx9_26") or die;
