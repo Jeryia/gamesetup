@@ -26,10 +26,10 @@ sub main {
 	# modules
 	modloader_tests();
 	wine_setup_tests();
+	wine_deps_tests();
 	unpack_tests();
 	hybridize_tests();
 	save_manager_tests();
-	wine_deps_tests();
 	prerun_script_tests();
 	exec_tests();
 }
