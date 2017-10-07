@@ -3,7 +3,7 @@ use warnings;
 use strict;
 
 use Cwd;
-use Test::Simple tests => 95;
+use Test::Simple tests => 101;
 
 use lib("./build/lib");
 use Gamesetup::Base;
@@ -24,10 +24,11 @@ sub main {
 	lib_wine_tests();
 
 	# modules
+	modloader_tests();
 	wine_setup_tests();
 	unpack_tests();
 	hybridize_tests();
-	modloader_tests();
+	save_manager_tests();
 	wine_deps_tests();
 	prerun_script_tests();
 	exec_tests();
@@ -287,6 +288,34 @@ sub modloader_tests {
 
 }
 
+sub save_manager_tests {
+	my $module = "./build/modules/80_save_manager.pl";
+	my $module_name = "save_manager";
+
+	my $test_area = "./build/tests/areas/modules/save_manager/";
+	print "\n\nStarting tests module: $module_name\n";
+	my $ret;
+
+	system('rm', '-rf', './tmp/saves');
+	system('rm', '-rf', './tmp/game');
+	system('rsync', '-arv', "$test_area/saves/", "./tmp/saves/");
+	system('mkdir', '-p', './tmp/game/save');
+	system('touch', './tmp/game/save/gamemade');
+	$ret = system($module, '--save_name', 'gamemade' ,"$test_area/basic.conf");
+	ok($ret == 0, "$module_name - new save: exits with 0") or die;
+
+	ok(-l './tmp/game/save', "$module_name - new save: linked") or die;
+	ok(-d './tmp/game/save/', "$module_name - new save: dir created") or die;
+
+	
+	$ret = system($module, '--save_name', 'testsave1' ,"$test_area/basic.conf");
+	ok($ret == 0, "$module_name - switch save: exits with 0") or die;
+
+	ok(-l './tmp/game/save', "$module_name - switch save: linked") or die;
+	ok(-f './tmp/game/save/testsave1.dat', "$module_name - switch save: switch successfull") or die;
+	
+	
+}
 
 sub wine_deps_tests {
 	my $module = "./build/modules/88_wine_deps.pl";

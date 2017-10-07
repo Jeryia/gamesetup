@@ -291,6 +291,7 @@ subs_strings '$(BUILD_DIR)/modules/01_hybridize.pl'
 subs_strings '$(BUILD_DIR)/modules/11_wine_setup.pl'
 subs_strings '$(BUILD_DIR)/modules/12_unpack.pl'
 subs_strings '$(BUILD_DIR)/modules/80_modloader.pl'
+subs_strings '$(BUILD_DIR)/modules/80_save_manager.pl'
 subs_strings '$(BUILD_DIR)/modules/88_wine_deps.pl'
 subs_strings '$(BUILD_DIR)/modules/89_prerun_script.pl'
 subs_strings '$(BUILD_DIR)/modules/90_wine_exec.pl'
@@ -312,6 +313,7 @@ subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_ask_link.conf
 subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_none_copy_save.conf'
 subs_strings '$(BUILD_DIR)/tests/areas/modules/modloader/modloader_none_link.conf'
 subs_strings '$(BUILD_DIR)/tests/areas/modules/wine_deps.conf'
+subs_strings '$(BUILD_DIR)/tests/areas/modules/save_manager/basic.conf'
 
 echo "
 test:
