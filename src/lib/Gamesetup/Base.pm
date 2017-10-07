@@ -8,7 +8,7 @@ use strict;
 our (@ISA, @EXPORT);
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT= qw(merge_hash_tables read_config system_w_output system_w_stdout setup_shell_env);
+@EXPORT= qw(merge_hash_tables read_config system_w_output system_w_stdout setup_shell_env array2file file2array);
 
 my %blank_hash = ();
 
@@ -282,4 +282,22 @@ sub expand_array {
 	return \@return;
 }
 
+sub array2file {
+	my $file = shift(@_);
+	my @array = @_;
+
+	open(my $fh, '>', $file) or return 0;
+	print $fh join("\n", @array);
+	close($fh);
+}
+
+sub file2array {
+	my $file = shift(@_);
+
+	my @array = ();
+	open(my $fh, '<', $file) or return 0;
+	@array = split("\n", <$fh>);
+	close($fh);
+	return @array;
+}
 1;
