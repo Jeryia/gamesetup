@@ -5,6 +5,7 @@ use strict;
 use Gamesetup::Base;
 use Gamesetup::Wine;
 use Getopt::Long qw(:config no_ignore_case);
+use Digest::MD5::File qw(file_md5_hex);
 
 my $opt_import;
 
@@ -42,9 +43,43 @@ sub main {
 	}
 	system("wineboot");
 
+
+
 	if ($config_wine{Registry_File}) {
-		system('regedit', $config_wine{Registry_File});
+		apply_reg($config_wine{Registry_File});
 	}
 }
 
+sub apply_reg {
+	my $file = shift(@_);
 
+	my $md5 = file_md5_hex($file);
+	my $wine_prefix = $ENV{WINEPREFIX};
+	my $tracking_file = "$wine_prefix/.gs-appliedregs";
+
+	my @applied_regs = file2array($tracking_file);
+
+	if (!item_in_array($md5, @applied_regs)) {
+		system('regedit', $file);
+		my @new_applied;
+		if (@applied_regs) {
+			@new_applied = (@applied_regs, $md5);
+		}
+		else {
+			@new_applied = ($md5);
+		}
+		array2file($tracking_file, @new_applied);
+	}
+}
+
+sub item_in_array {
+	my $s_item = shift(@_);
+	my @array = @_;
+
+	foreach my $item (@array) {
+		if ($item eq $s_item) {
+			return 1;
+		}
+	}
+	return 0;
+}
